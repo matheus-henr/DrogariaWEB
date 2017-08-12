@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/tamplates/modelo.xhtml">
+
+
+	<f:metadata>
+		<f:viewParam name="codigo" value="#{MBFabricante.codigo}" />
+	</f:metadata>
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuPrincipal.xhtml" />
+
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<h:form id="formFabricantes">
+			<p:dataTable id="tblFabricantes" widgetVar="tabelaFabricante"
+				wemptyMessage="nenhum dado encotrado" value="#{MBFabricante.itens}"
+				var="item" filteredValue="#{MBFabricante.itensFiltrado}"
+				paginator="true" rows="8">
+
+				<f:facet name="header">
+              		Fabricante - listagem
+              		
+              		
+				</f:facet>
+				<p:column headerText="Codigo" sortBy="#{item.codigo}" filterBy="#{item.codigo}">
+					<h:outputText value="#{item.codigo}" />
+				</p:column>
+
+				<p:column headerText="Descrição" sortBy="#{item.descricao}"
+					filterBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+
+				<p:column headerText="Opcão">
+					<p:commandButton icon="ui-icon-trash"
+						actionListener="#{MBFabricante.pegaPosicao}"
+						oncomplete="PF('Apagar').show();" update=":formDeletar:pnldeletar">
+						<f:param name="codigo" value="#{item.codigo}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-pencil"
+						actionListener="#{MBFabricante.pegaPosicao}"
+						oncomplete="PF('Editar').show();" update=":formEditar:pnlEditar">
+						<f:param name="codigo" value="#{item.codigo}" />
+					</p:commandButton>
+
+
+				</p:column>
+
+
+				<f:facet name="footer">
+					<p:commandButton value="Novo"
+						actionListener="#{MBFabricante.preparaNovoFabricante}"
+						oncomplete="PF('NCadastro').show();"
+						update=":formNovoFab:pnlNovoFab" />
+
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+
+		<!--  dialogo adicionar  -->
+		<p:dialog widgetVar="NCadastro" closable="false" draggable="false"
+			resizable="false" modal="true" appendTo="@(body)"
+			header="Fabricante - Novo">
+
+			<h:form id="formNovoFab">
+
+				<h:panelGrid id="pnlNovoFab" columns="2">
+					<p:outputLabel value="Descricao:*" />
+					<p:inputText size="30" maxlength="50" required="true"
+						requiredMessage="Campo Obrigatorio"
+						value="#{MBFabricante.fabricante.descricao}" />
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Gravar"
+						actionListener="#{MBFabricante.novoFabricante}"
+						oncomplete="PF('NCadastro').hide(); "
+						update=":formFabricantes:tblFabricantes :msgGLobal" />
+
+					<p:commandButton value="Cancelar" process="@this" onclick="PF('NCadastro').hide();" >
+						<p:resetInput target="NCadastro"/>
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+
+		<!-- Dialogo apagar -->
+		<p:dialog widgetVar="Apagar" closable="false" draggable="false"
+			responsive="false" modal="true" appendTo="@(body)" resizable="false"
+			header="Fabricante - Apagar">
+
+			<h:form id="formDeletar">
+				<h:panelGrid id="pnldeletar" columns="2">
+					<p:outputLabel value="Codigo: " />
+					<h:outputText value="#{MBFabricante.fabricante.codigo}" />
+
+					<h:outputText value="Descrição: " />
+					<h:outputText value="#{MBFabricante.fabricante.descricao}" />
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Apagar"
+						actionListener="#{MBFabricante.deletar}"
+						oncomplete="PF('Apagar').hide(); "
+						update=":formFabricantes:tblFabricantes :msgGLobal" />
+
+					<p:commandButton value="Cancelar" onclick="PF('Apagar').hide(); " />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<!-- dialogo editar -->
+		<p:dialog widgetVar="Editar" closable="false" draggable="false"
+			responsive="false" modal="true" appendTo="@(body)" resizable="false"
+			header="Editar - Fabricante">
+
+			<h:form id="formEditar">
+				<h:panelGrid id="pnlEditar" columns="2">
+					<h:outputLabel value="Descrição" />
+					<h:inputText size="30"  required="true"
+						requiredMessage="Campo Obrigatorio" maxlength="50"
+						value="#{MBFabricante.fabricante.descricao}" />
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Editar" action="#{MBFabricante.editar}"
+						oncomplete="PF('Editar').hide();"
+						update=":formFabricantes:tblFabricantes :msgGLobal" />
+
+					<p:commandButton value="Cancelar" process="@this" onclick="PF('Editar').hide();">
+						<p:resetInput target="Editar"/>
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+
+		</p:dialog>
+		<!-- dialogo busca personalizada -->
+		<p:dialog widgetVar="pesquisa" closable="true" draggable="true"
+			responsive="false" modal="true" appendTo="@(body)" resizable="false"
+			header="Pesquisar">
+			<h:form id="idPesq">
+
+				<h:panelGrid columns="2">
+					<p:selectOneRadio id="FDBusca" value="#{MBFabricante.escolhaBusca}">
+						<f:selectItem itemLabel="Codigo" itemValue="c" />
+						<f:selectItem itemLabel="Descricao" itemValue="d" />
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+				<h:panelGrid id="pnlPesq" columns="2">
+					<p:outputLabel value="Codigo:" />
+					<p:inputText size="30" maxlength="50"
+						value="#{MBFabricante.fabricante.codigo}" />
+
+					<p:outputLabel value="Descricao" />
+					<p:inputText size="30" maxlength="50"
+						value="#{MBFabricante.fabricante.descricao}" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
